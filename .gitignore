@@ -1,0 +1,10 @@
+data/
+__pycache__/
+.pytest_cache/
+.venv/
+node_modules/
+dist/
+target/
+dependency-reduced-pom.xml
+.env
+*.pyc

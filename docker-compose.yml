@@ -1,0 +1,55 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    environment:
+      DATA_DIR: /data
+      ALLOWED_IMPORT_ROOTS: ${ALLOWED_IMPORT_ROOTS:-/data/imports}
+      MAX_IMPORT_SIZE_MB: ${MAX_IMPORT_SIZE_MB:-5000}
+      MAX_IMPORT_FILE_SIZE_MB: ${MAX_IMPORT_FILE_SIZE_MB:-512}
+      DECOMPILER: ${DECOMPILER:-cfr}
+      CFR_JAR_PATH: ${CFR_JAR_PATH:-}
+      QDRANT_URL: http://qdrant:6333
+      QDRANT_COLLECTION: code_support_agent
+      ENABLE_VECTOR_INDEX: "true"
+      LLM_PROVIDER: ${LLM_PROVIDER:-mock}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4.1-mini}
+      OLLAMA_BASE_URL: http://ollama:11434
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-llama3.1}
+    volumes:
+      - backend-data:/data
+    ports:
+      - "8000:8000"
+    depends_on:
+      - qdrant
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+  qdrant:
+    image: qdrant/qdrant:v1.12.5
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant-data:/qdrant/storage
+
+  ollama:
+    image: ollama/ollama:latest
+    profiles:
+      - ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+
+volumes:
+  backend-data:
+  qdrant-data:
+  ollama-data:
